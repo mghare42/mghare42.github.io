@@ -61,48 +61,83 @@
         .modal-backdrop {
             background-color: rgba(0, 0, 0, 0.75);
         }
+        .disclaimer {
+            background-color: #374151; /* bg-gray-700 */
+            border-bottom: 1px solid #4B5563; /* border-gray-600 */
+        }
+        /* New styles for start screen */
+        #start-screen {
+            background-color: #111827;
+            z-index: 100;
+        }
+        .blink {
+            animation: blink-animation 1s steps(2, start) infinite;
+        }
+        @keyframes blink-animation {
+            to {
+                visibility: hidden;
+            }
+        }
     </style>
 </head>
 <body class="antialiased">
 
-    <!-- Main Container -->
-    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
-
-        <!-- Header -->
-        <header class="text-center mb-8">
-            <h1 class="text-4xl md:text-5xl font-game text-blue-400 mb-2">Habit RPG</h1>
-            <p class="text-lg text-gray-400">Level up your life, one habit at a time.</p>
-        </header>
-
-        <!-- Global Stats & Controls -->
-        <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 mb-8 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div id="global-stats" class="text-center md:text-left">
-                <p class="text-sm text-gray-400">USER ID: <span id="user-id-display" class="font-mono text-xs">Loading...</span></p>
-                <h2 class="text-2xl font-bold text-white">Overall Level: <span id="global-level" class="text-green-400">1</span></h2>
-                <div class="w-full md:w-64 bg-gray-700 rounded-full h-2.5 mt-2">
-                    <div id="global-progress-bar" class="bg-green-500 h-2.5 rounded-full" style="width: 0%"></div>
-                </div>
-                <p class="text-sm text-gray-400 mt-1"><span id="global-xp">0</span> / <span id="global-xp-needed">100</span> XP</p>
-            </div>
-            <button id="add-habit-btn" class="w-full md:w-auto font-bold py-3 px-6 rounded-lg btn-primary shadow-lg transform hover:scale-105 transition-transform">
-                + Add New Habit
+    <!-- Start Screen -->
+    <div id="start-screen" class="fixed inset-0 flex flex-col items-center justify-center">
+        <div class="text-center">
+            <button id="press-start-btn" class="font-game text-3xl md:text-5xl text-yellow-300 blink">
+                PRESS START
             </button>
+            <p class="font-game text-sm text-gray-400 mt-8">A Videlectrix Game</p>
+        </div>
+    </div>
+
+    <!-- Main App Content (initially hidden) -->
+    <div id="main-app" class="hidden">
+        <!-- Disclaimer -->
+        <div class="disclaimer text-center p-2 text-sm text-yellow-300">
+            <strong>Note:</strong> Game data is stored in your browser. Clearing your browser cache or data will reset your progress.
         </div>
 
-        <!-- Habits Grid -->
-        <main id="habits-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Habit cards will be injected here by JavaScript -->
-        </main>
-        
-        <!-- Loading/Empty State -->
-        <div id="loading-state" class="text-center py-16">
-            <p class="text-gray-500">Loading your habits...</p>
-        </div>
-        <div id="empty-state" class="text-center py-16 hidden">
-             <p class="text-2xl font-bold">Your journey begins now!</p>
-             <p class="text-gray-400 mt-2">Click "+ Add New Habit" to create your first quest.</p>
-        </div>
+        <!-- Main Container -->
+        <div class="container mx-auto p-4 md:p-8 max-w-7xl">
 
+            <!-- Header -->
+            <header class="text-center mb-8">
+                <h1 class="text-4xl md:text-5xl font-game text-blue-400 mb-2">Habit RPG</h1>
+                <p class="text-lg text-gray-400">Level up your life, one habit at a time.</p>
+            </header>
+
+            <!-- Global Stats & Controls -->
+            <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 mb-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div id="global-stats" class="text-center md:text-left">
+                    <p class="text-sm text-gray-400">USER ID: <span id="user-id-display" class="font-mono text-xs">Loading...</span></p>
+                    <h2 class="text-2xl font-bold text-white">Overall Level: <span id="global-level" class="text-green-400">1</span></h2>
+                    <div class="w-full md:w-64 bg-gray-700 rounded-full h-2.5 mt-2">
+                        <div id="global-progress-bar" class="bg-green-500 h-2.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-1"><span id="global-xp">0</span> / <span id="global-xp-needed">100</span> XP</p>
+                </div>
+                <button id="add-habit-btn" class="w-full md:w-auto font-bold py-3 px-6 rounded-lg btn-primary shadow-lg transform hover:scale-105 transition-transform">
+                    + Add New Habit
+                </button>
+            </div>
+
+            <!-- Habits Grid -->
+            <main id="habits-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Habit cards will be injected here by JavaScript -->
+            </main>
+            
+            <!-- Loading/Empty State -->
+            <div id="loading-state" class="text-center py-16">
+                <p class="text-gray-500">Loading your habits...</p>
+            </div>
+            <div id="empty-state" class="text-center py-16 hidden">
+                 <p class="text-2xl font-bold">Your journey begins now!</p>
+                 <p class="text-gray-400 mt-2">Click "+ Add New Habit" to create your first quest.</p>
+            </div>
+
+        </div>
     </div>
 
     <!-- Add Habit Modal -->
@@ -139,23 +174,16 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
+    <!-- Local Storage Logic -->
     <script type="module">
-        // Firebase Imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, collection, addDoc, getDocs, onSnapshot, updateDoc, deleteDoc, serverTimestamp, query, where, arrayUnion, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // --- CONFIG & INITIALIZATION ---
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'habit-rpg-app';
-        
-        let app, db, auth;
         let userId = null;
         let habits = [];
         let habitIntervals = {}; // To store setInterval IDs for timers
 
         // DOM Elements
+        const startScreen = document.getElementById('start-screen');
+        const pressStartBtn = document.getElementById('press-start-btn');
+        const mainApp = document.getElementById('main-app');
         const habitsContainer = document.getElementById('habits-container');
         const addHabitBtn = document.getElementById('add-habit-btn');
         const modal = document.getElementById('add-habit-modal');
@@ -165,14 +193,39 @@
         const emptyState = document.getElementById('empty-state');
         const userIdDisplay = document.getElementById('user-id-display');
 
+        // --- LOCAL STORAGE FUNCTIONS ---
+        
+        function loadHabitsFromLocal() {
+            const habitsJSON = localStorage.getItem('habits');
+            if (!habitsJSON) return [];
+            return JSON.parse(habitsJSON).map(habit => {
+                if (habit.lastResetTimestamp) {
+                    habit.lastResetTimestamp = new Date(habit.lastResetTimestamp);
+                }
+                if (habit.checkIns) {
+                    habit.checkIns = habit.checkIns.map(ts => new Date(ts));
+                }
+                return habit;
+            });
+        }
+
+        function saveHabitsToLocal() {
+            localStorage.setItem('habits', JSON.stringify(habits));
+        }
+
+        function getUserIdFromLocal() {
+            let localUserId = localStorage.getItem('userId');
+            if (!localUserId) {
+                localUserId = `local-user-${crypto.randomUUID()}`;
+                localStorage.setItem('userId', localUserId);
+            }
+            return localUserId;
+        }
+
+
         // --- GAME LOGIC & CALCULATIONS ---
         const XP_BASE_FOR_LEVEL = 100;
 
-        /**
-         * Calculates the level and progress based on total XP.
-         * @param {number} xp - The total experience points.
-         * @returns {object} An object with level, xpForNextLevel, and progressPercentage.
-         */
         function calculateLevelInfo(xp) {
             if (xp < 0) xp = 0;
             const level = Math.floor(Math.sqrt(xp / XP_BASE_FOR_LEVEL)) + 1;
@@ -184,30 +237,17 @@
             return { level, xpForNextLevel, progressPercentage };
         }
 
-        /**
-         * Calculates XP for an abstinence habit based on duration in seconds.
-         * The formula provides an accelerating reward curve.
-         * @param {number} seconds - The duration of abstinence in seconds.
-         * @returns {number} The calculated experience points.
-         */
         function calculateAbstinenceXp(seconds) {
             const minutes = seconds / 60;
-            // A formula that rewards longer streaks more heavily
             const xp = Math.floor(minutes + Math.pow(minutes, 1.6));
             return xp > 0 ? xp : 0;
         }
 
-        /**
-         * Calculates XP for a consistency habit check-in, including streak bonuses.
-         * @param {array} checkIns - An array of Timestamp objects for each check-in.
-         * @returns {object} An object with xpGained and currentStreak.
-         */
         function calculateConsistencyXp(checkIns) {
             const baseXP = 100;
             let currentStreak = 0;
             
-            // Filter out any null/pending timestamps and convert to Date objects
-            const validCheckIns = checkIns.filter(ts => ts).map(ts => ts.toDate());
+            const validCheckIns = (checkIns || []).filter(date => date instanceof Date);
 
             if (validCheckIns.length > 0) {
                 const sortedCheckIns = validCheckIns.sort((a, b) => b - a);
@@ -216,7 +256,6 @@
                 const isSameDay = (d1, d2) => d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
 
                 if (isSameDay(sortedCheckIns[0], today)) {
-                    // Already checked in today, calculate streak based on history
                     currentStreak = 1;
                     let lastDate = sortedCheckIns[0];
                     for (let i = 1; i < sortedCheckIns.length; i++) {
@@ -230,7 +269,6 @@
                         }
                     }
                 } else {
-                    // This is a new check-in, calculate streak based on history
                     currentStreak = 1;
                     let lastDate = today;
                     for (const checkInDate of sortedCheckIns) {
@@ -240,12 +278,11 @@
                             currentStreak++;
                             lastDate = checkInDate;
                         } else {
-                            break; // Streak is broken
+                            break; 
                         }
                     }
                 }
             } else {
-                // First check-in ever
                 currentStreak = 1;
             }
 
@@ -256,11 +293,7 @@
 
         // --- RENDERING & UI ---
 
-        /**
-         * Renders all habits to the DOM and updates global stats.
-         */
         function renderHabits() {
-            // Clear existing timers and content
             Object.values(habitIntervals).forEach(clearInterval);
             habitIntervals = {};
             habitsContainer.innerHTML = '';
@@ -287,43 +320,28 @@
 
                 if (habit.type === 'abstinence') {
                     const timerId = `timer-${habit.id}`;
-                    // FIX: Check if the server timestamp has arrived.
-                    if (habit.lastResetTimestamp) {
-                        habitSpecificContent = `
-                            <div class="text-center my-4">
-                                <p class="text-gray-400 text-sm">CURRENT STREAK</p>
-                                <p id="${timerId}" class="text-3xl font-mono font-bold text-green-400">00:00:00</p>
-                            </div>
-                            <button class="w-full py-2 px-4 rounded-md btn-danger reset-btn">I Messed Up (Reset)</button>
-                        `;
-                        // Set up a timer to update the display
-                        const startTime = habit.lastResetTimestamp.toDate();
-                        habitIntervals[habit.id] = setInterval(() => {
-                            const now = new Date();
-                            const diff = now - startTime;
-                            const hours = String(Math.floor(diff / 3600000)).padStart(2, '0');
-                            const minutes = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
-                            const seconds = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
-                            const timerEl = document.getElementById(timerId);
-                            if (timerEl) {
-                               timerEl.textContent = `${hours}:${minutes}:${seconds}`;
-                            }
-                        }, 1000);
-                    } else {
-                        // Show a loading/syncing state if timestamp is not yet available
-                        habitSpecificContent = `
-                            <div class="text-center my-4">
-                                <p class="text-gray-400 text-sm">CURRENT STREAK</p>
-                                <p class="text-3xl font-mono font-bold text-green-400">Syncing...</p>
-                            </div>
-                            <button class="w-full py-2 px-4 rounded-md btn-danger reset-btn" disabled>I Messed Up (Reset)</button>
-                        `;
-                    }
+                    habitSpecificContent = `
+                        <div class="text-center my-4">
+                            <p class="text-gray-400 text-sm">CURRENT STREAK</p>
+                            <p id="${timerId}" class="text-3xl font-mono font-bold text-green-400">00:00:00</p>
+                        </div>
+                        <button class="w-full py-2 px-4 rounded-md btn-danger reset-btn">I Messed Up (Reset)</button>
+                    `;
+                    const startTime = habit.lastResetTimestamp;
+                    habitIntervals[habit.id] = setInterval(() => {
+                        const now = new Date();
+                        const diff = now - startTime;
+                        const hours = String(Math.floor(diff / 3600000)).padStart(2, '0');
+                        const minutes = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+                        const seconds = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+                        const timerEl = document.getElementById(timerId);
+                        if (timerEl) {
+                           timerEl.textContent = `${hours}:${minutes}:${seconds}`;
+                        }
+                    }, 1000);
                 } else { // 'consistency'
-                    const { currentStreak } = calculateConsistencyXp(habit.checkIns || []);
-                    // FIX: Safely access the last check-in only if it exists.
-                    const lastCheckInTimestamp = habit.checkIns && habit.checkIns.length > 0 ? habit.checkIns[habit.checkIns.length - 1] : null;
-                    const lastCheckIn = lastCheckInTimestamp ? lastCheckInTimestamp.toDate() : null;
+                    const { currentStreak } = calculateConsistencyXp(habit.checkIns);
+                    const lastCheckIn = habit.checkIns && habit.checkIns.length > 0 ? habit.checkIns[habit.checkIns.length - 1] : null;
 
                     const today = new Date();
                     const alreadyCheckedInToday = lastCheckIn && lastCheckIn.toDateString() === today.toDateString();
@@ -367,10 +385,6 @@
             updateGlobalStats(totalGlobalXp);
         }
 
-        /**
-         * Updates the global statistics display at the top of the page.
-         * @param {number} totalGlobalXp - The sum of XP from all habits.
-         */
         function updateGlobalStats(totalGlobalXp) {
             const globalLevelInfo = calculateLevelInfo(totalGlobalXp);
             document.getElementById('global-level').textContent = globalLevelInfo.level;
@@ -379,129 +393,98 @@
             document.getElementById('global-progress-bar').style.width = `${globalLevelInfo.progressPercentage}%`;
         }
 
-        // --- FIRESTORE & DATA HANDLING ---
+        // --- DATA HANDLING ---
         
-        /**
-         * Sets up a real-time listener for the user's habits.
-         */
-        function listenForHabits() {
-            if (!db || !userId) return;
-            const habitsCollection = collection(db, "artifacts", appId, "public", "data", "habits");
-            const q = query(habitsCollection, where("userId", "==", userId));
-
-            onSnapshot(q, (snapshot) => {
-                habits = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderHabits();
-            }, (error) => {
-                console.error("Error listening for habits:", error);
-            });
-        }
-
-        /**
-         * Handles the form submission to add a new habit.
-         * @param {Event} e - The form submission event.
-         */
-        async function handleAddHabit(e) {
+        function handleAddHabit(e) {
             e.preventDefault();
             const formData = new FormData(addHabitForm);
             const name = formData.get('habit-name');
             const type = formData.get('habit-type');
 
             const newHabit = {
+                id: crypto.randomUUID(),
                 userId,
                 name,
                 type,
                 totalXp: 0,
-                createdAt: serverTimestamp(),
+                createdAt: new Date(),
             };
 
             if (type === 'abstinence') {
-                newHabit.lastResetTimestamp = serverTimestamp();
+                newHabit.lastResetTimestamp = new Date();
             } else {
                 newHabit.checkIns = [];
             }
             
-            try {
-                const habitsCollection = collection(db, "artifacts", appId, "public", "data", "habits");
-                await addDoc(habitsCollection, newHabit);
-                addHabitForm.reset();
-                modal.classList.add('hidden');
-            } catch (error) {
-                console.error("Error adding habit:", error);
-                // Here you could show an error message to the user
-            }
+            habits.push(newHabit);
+            saveHabitsToLocal();
+            renderHabits();
+
+            addHabitForm.reset();
+            modal.classList.add('hidden');
         }
 
-        /**
-         * Handles resetting an abstinence habit timer.
-         * @param {string} habitId - The ID of the habit to reset.
-         */
-        async function handleResetAbstinence(habitId) {
-            const habit = habits.find(h => h.id === habitId);
-            // FIX: Ensure habit and its timestamp exist before proceeding.
-            if (!habit || !habit.lastResetTimestamp) return;
+        function handleResetAbstinence(habitId) {
+            const habitIndex = habits.findIndex(h => h.id === habitId);
+            if (habitIndex === -1) return;
 
+            const habit = habits[habitIndex];
             const now = new Date();
-            const lastReset = habit.lastResetTimestamp.toDate();
+            const lastReset = habit.lastResetTimestamp;
             const secondsElapsed = Math.floor((now - lastReset) / 1000);
             const xpGained = calculateAbstinenceXp(secondsElapsed);
 
-            try {
-                const habitDocRef = doc(db, "artifacts", appId, "public", "data", "habits", habitId);
-                await updateDoc(habitDocRef, {
-                    totalXp: habit.totalXp + xpGained,
-                    lastResetTimestamp: serverTimestamp()
-                });
-                // The onSnapshot listener will handle the re-render
-            } catch (error) {
-                console.error("Error resetting habit:", error);
-            }
-        }
-
-        /**
-         * Handles checking in for a consistency habit.
-         * @param {string} habitId - The ID of the habit to check in.
-         */
-        async function handleCheckInConsistency(habitId) {
-            const habit = habits.find(h => h.id === habitId);
-            if (!habit) return;
+            habit.totalXp += xpGained;
+            habit.lastResetTimestamp = new Date();
             
-            const { xpGained } = calculateConsistencyXp(habit.checkIns || []);
-
-            try {
-                const habitDocRef = doc(db, "artifacts", appId, "public", "data", "habits", habitId);
-                await updateDoc(habitDocRef, {
-                    totalXp: habit.totalXp + xpGained,
-                    checkIns: arrayUnion(Timestamp.now())
-                });
-            } catch (error) {
-                console.error("Error checking in:", error);
-            }
+            saveHabitsToLocal();
+            renderHabits();
         }
 
-        /**
-         * Handles deleting a habit.
-         * @param {string} habitId - The ID of the habit to delete.
-         */
-        async function handleDeleteHabit(habitId) {
-            // A simple confirmation for such a destructive action
+        function handleCheckInConsistency(habitId) {
+            const habitIndex = habits.findIndex(h => h.id === habitId);
+            if (habitIndex === -1) return;
+
+            const habit = habits[habitIndex];
+            const { xpGained } = calculateConsistencyXp(habit.checkIns);
+
+            habit.totalXp += xpGained;
+            habit.checkIns.push(new Date());
+
+            saveHabitsToLocal();
+            renderHabits();
+        }
+
+        function handleDeleteHabit(habitId) {
             if (!window.confirm("Are you sure you want to delete this habit? All progress will be lost.")) {
                 return;
             }
-            try {
-                const habitDocRef = doc(db, "artifacts", appId, "public", "data", "habits", habitId);
-                await deleteDoc(habitDocRef);
-            } catch (error) {
-                console.error("Error deleting habit:", error);
-            }
+            habits = habits.filter(h => h.id !== habitId);
+            saveHabitsToLocal();
+            renderHabits();
         }
 
-        // --- EVENT LISTENERS ---
+        // --- APP INITIALIZATION & EVENT LISTENERS ---
+        
+        function initializeMainApp() {
+            startScreen.classList.add('hidden');
+            mainApp.classList.remove('hidden');
+
+            userId = getUserIdFromLocal();
+            userIdDisplay.textContent = userId;
+            habits = loadHabitsFromLocal();
+            renderHabits();
+        }
+
+        pressStartBtn.addEventListener('click', () => {
+            sessionStorage.setItem('gameStarted', 'true');
+            initializeMainApp();
+        });
+
         addHabitBtn.addEventListener('click', () => modal.classList.remove('hidden'));
         cancelModalBtn.addEventListener('click', () => modal.classList.add('hidden'));
         addHabitForm.addEventListener('submit', handleAddHabit);
         
-        // Use event delegation for buttons on dynamically created cards
         habitsContainer.addEventListener('click', (e) => {
             const target = e.target.closest('button');
             if (!target) return;
@@ -518,36 +501,11 @@
             }
         });
         
-        // --- INITIALIZATION ---
-        window.onload = async () => {
-            try {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        userIdDisplay.textContent = userId;
-                        listenForHabits();
-                    } else {
-                        // If no user, sign in. Use custom token if available, else anonymous.
-                        try {
-                            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                                await signInWithCustomToken(auth, __initial_auth_token);
-                            } else {
-                                await signInAnonymously(auth);
-                            }
-                            // The onAuthStateChanged listener will be called again after sign-in.
-                        } catch (authError) {
-                            console.error("Authentication failed:", authError);
-                            userIdDisplay.textContent = "Auth Error";
-                        }
-                    }
-                });
-            } catch (e) {
-                console.error("Firebase initialization failed:", e);
-                loadingState.innerHTML = '<p class="text-red-500">Error: Could not connect to the database. Please check console.</p>';
+        // --- INITIALIZATION ON PAGE LOAD ---
+        window.onload = () => {
+            // If the game has already been started in this session, skip the start screen
+            if (sessionStorage.getItem('gameStarted') === 'true') {
+                initializeMainApp();
             }
         };
 
